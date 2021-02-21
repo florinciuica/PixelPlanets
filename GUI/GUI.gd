@@ -33,7 +33,7 @@ func _ready():
 	$Settings/VBoxContainer/SliderPixels.max_value = max_pixel_size
 	$Settings/VBoxContainer/SliderPixels.value = pixels
 	# this sets the viewport to correct size, otherwise cropping occurs
-	$PlanetViewport.size = Vector2(max_pixel_size + 100, max_pixel_size + 100)
+	$PlanetViewport.size = Vector2(max_pixel_size + 300, max_pixel_size + 300)
 	_update_viewport()
 
 func _on_OptionButton_item_selected(index):
