@@ -18,15 +18,23 @@ onready var planets = {
 	"Asteroid": preload("res://Planets/Asteroids/Asteroid.tscn"),
 	"Star": preload("res://Planets/Star/Star.tscn"),
 }
-const max_pixel_size = 100.0;
-var pixels = 100.0
-var scale = 1.0
+
+# Change this to whatever value needed. It will automatically set the propper
+# viewport and export values. Careful, large values are no longer pixel art.
+const max_pixel_size = 300.0;
+var pixels = 200.0
+var scale = 1
 var sd = 0
 
 func _ready():
 	for k in planets.keys():
 		optionbutton.add_item(k)
 	_seed_random()
+	$Settings/VBoxContainer/SliderPixels.max_value = max_pixel_size
+	$Settings/VBoxContainer/SliderPixels.value = pixels
+	# this sets the viewport to correct size, otherwise cropping occurs
+	$PlanetViewport.size = Vector2(max_pixel_size + 100, max_pixel_size + 100)
+	_update_viewport()
 
 func _on_OptionButton_item_selected(index):
 	var chosen = planets[planets.keys()[index]]
@@ -34,14 +42,16 @@ func _on_OptionButton_item_selected(index):
 
 func _on_SliderPixels_value_changed(value):
 	pixels = value
-	viewport_planet.get_child(0).set_pixels(value)
-	viewport_holder.rect_scale = Vector2(2,2) * max_pixel_size/pixels
-	#viewport_holder.rect_position = Vector2(1,1) * max_pixel_size/pixels - Vector2(200,200)
+	_update_viewport()
+
+func _update_viewport():
+	viewport_planet.get_child(0).set_pixels(pixels)
+	viewport_holder.rect_scale = Vector2(200/max_pixel_size, 200/max_pixel_size) * max_pixel_size/pixels
 	$Settings/VBoxContainer/Label3.text = "Pixels: " + String(pixels) + "x" + String(pixels)
 
 func _on_SliderScale_value_changed(value):
 	scale = value
-	viewport_holder.rect_scale = Vector2(1,1)*value
+	viewport_holder.rect_scale = Vector2(1,1) * value
 
 func _on_SliderRotation_value_changed(value):
 	viewport_planet.get_child(0).set_rotate(value)
@@ -90,7 +100,7 @@ func _on_ExportPNG_pressed():
 	var image = Image.new()
 	image.create(pixels * planet.relative_scale, pixels * planet.relative_scale, false, Image.FORMAT_RGBA8)
 	var source_xy = 100 - (pixels*(planet.relative_scale-1)*0.5)
-	var source_size = 100*planet.relative_scale
+	var source_size = max_pixel_size * planet.relative_scale
 	var source_rect = Rect2(source_xy, source_xy,source_size,source_size)
 	image.blit_rect(tex, source_rect, Vector2(0,0))
 	
@@ -113,7 +123,7 @@ func export_spritesheet(sheet_size, progressbar):
 			if index != 0:
 				var image = viewport.get_texture().get_data()
 				var source_xy = 100 - (pixels*(planet.relative_scale-1)*0.5)
-				var source_size = 100*planet.relative_scale
+				var source_size = max_pixel_size * planet.relative_scale
 				var source_rect = Rect2(source_xy, source_xy,source_size,source_size)
 				var destination = Vector2(x - 1,y) * pixels * planet.relative_scale
 				sheet.blit_rect(image, source_rect, destination)
